@@ -1,0 +1,299 @@
+### Instance.tf
+
+Se quita linea modifica linea  
+security_groups = "aws_security_group.ac1-sg.id" 
+x
+vpc_security_group_ids = [aws_security_group.ac1_sg.id]
+Se define correctamente sin comillas 
+
+Se redirige la key privada a la correcta de vockey.pem de nuestro   
+private_key = file("~/Documents/ORT/labsuser.cer")
+x
+private_key = file("/root/.ssh/vockey.pem")
+
+
+Se modifica despliegue de la aplicacion en la instancia desplegada
+      "sudo yum install httpd git curl",      
+      "git clone https://github.com/mauricioamendola/chaos-monkey-app.git",      
+      "sudo mv chaos-monkey-app/website/* /var/www/html/",
+      "sudo systemctl enable httpd",
+      "sudo systemctl start httpd",
+      "sudo poweroff",      
+  
+x
+  
+      "sudo yum update -y", Se realiza el update
+      "sudo yum install -y httpd git",      #Actualiza los paquetes y instala apache/Correspondientemente
+      "sudo systemctl enable httpd",
+      "sudo systemctl start httpd",
+      "sudo rm -rf /var/www/html/*",      ## Habilita,inicia el servicio tomcat y elimina el contenido del directorio default de apache
+      "sudo git clone https://github.com/mauricioamendola/chaos-monkey-app.git /var/www/html/",
+      "sudo cp -r /tmp/chaos/* /var/www/html/",
+      "sudo chown -R apache:apache /var/www/html",    # Realiza una clonacion del repositorio, copia el contenido al directorio default de apache
+      "sudo sudo cp -rf /var/www/html/website/* /var/www/html/",
+      "sudo systemctl restart httpd"    ## Brinda los permisos de lectura y copia el contenido y reinicia el servicio de apache para que tome el contenido 
+
+
+### lb.tf
+
+
+
+SE MODIFICA TODO EL CONTENIDO DEL CON ERROR DE TIPEO (En este caso, guion medio por guion bajo)
+
+  resource "aws_lb_target_group" "ac1-tg" {
+x
+  resource "aws_lb_target_group" "ac1_tg" {
+
+
+  vpc_id      = aws_vpc.vpc-ac1.id
+x
+  vpc_id      = aws_vpc.vpc_ac1.id
+
+
+resource "aws_alb_target_group_attachment" "ac1-tg-attachment" {
+  target_group_arn = aws_lb_target_group.ac1-tg.arn
+  target_id        = aws_instance.ac1-instance.id
+
+x
+
+resource "aws_lb_target_group_attachment" "ac1_tg_attachment" {
+  target_group_arn = aws_lb_target_group.ac1_tg.arn
+  target_id        = aws_instance.ac1_instance.id
+
+  resource "aws_lb" "ac1-lb" {
+x
+  resource "aws_lb" "ac1_lb" {
+
+
+  security_groups    = [aws_security_group.ac1-lb-sg.id]
+  subnets            = [aws_subnet.ac1-private-subnet.id, aws_subnet.ac1-private-subnet-2.id]
+x
+  security_groups    = [aws_security_group.ac1_lb_sg.id]
+  subnets            = [aws_subnet.ac1_public_subnet.id, aws_subnet.ac1_public_subnet_2.id]
+
+
+  resource "aws_lb_listener" "ac1-listener" {
+    load_balancer_arn = aws_lb.ac1-lb.arn
+x
+
+  resource "aws_lb_listener" "ac1_listener" {
+    load_balancer_arn = aws_lb.ac1_lb.arn
+
+## Falta un caracter ("e") ademas del guion
+
+resource "aws_lb_listener_rule" "ac1-listener-rule" {
+  listener_arn = aws_lb_listener.ac1-listner.arn
+x
+resource "aws_lb_listener_rule" "ac1_listener_rule" {
+  listener_arn = aws_lb_listener.ac1_listener.arn
+ 
+    target_group_arn = aws_lb_target_group.ac1-tg.arn
+X
+    target_group_arn = aws_lb_target_group.ac1_tg.arn
+
+Se dirige el contenido al path correcto
+      values = ["/var/www/html/index.html"]
+x
+      values = ["/index.html"]
+
+
+### Network.tf
+
+Se modifica error de guion del medio por guion bajo
+
+resource "aws_vpc" "vpc-ac1" {
+x
+resource "aws_vpc" "vpc_ac1" {
+
+Se modifica nombre correcto completo de la vpc
+    Name = "terraform-vpc-ac1"
+x
+    Name = "vpc-ac1"
+
+Se modifica error de guion del medio por guion bajo
+
+  resource "aws_subnet" "ac1-private-subnet" {
+    vpc_id                  = aws_vpc.vpc-ac1.id
+x
+
+  resource "aws_subnet" "ac1_public_subnet" {
+    vpc_id                  = aws_vpc.vpc_ac1.id
+
+Se setea el valor booleano correctamente sin comillas y en el valor correcto
+
+  map_public_ip_on_launch = "false"
+x
+  map_public_ip_on_launch = true
+
+Se define recurso subnet 2 y se define correctamente internet gateway con guion bajo
+
+resource "aws_internet_gateway" "ac1_igw" {
+  vpc_id = aws_vpc.vpc_ac1.id
+
+resource "aws_subnet" "ac1_public_subnet_2" {
+  vpc_id                  = aws_vpc.vpc_ac1.id
+  cidr_block              = var.private_subnet-2
+  availability_zone       = var.vpc_aws_az-2
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "ac1-public-subnet-2"
+  }
+}
+
+Se modifica por nombre correcto
+    Name = "terraform-ac1-gw"
+x
+    Name = "ac1-igw"
+
+Se define nombre correctamente en la tabla
+
+resource "aws_route_table" "ac1_route_table" {
+  vpc_id = aws_vpc.vpc-ac1.id
+x
+resource "aws_route_table" "ac1_rt" {
+  vpc_id = aws_vpc.vpc_ac1.id
+
+Se modifica el cidr_block para que incluya todo el rango ip y nombre correcto 
+
+    cidr_block = "172.16.0.0/16"
+    gateway_id = aws_internet_gateway.ac1-gw.id
+x
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.ac1_igw.id
+
+Se define nombre de la route table correctamente
+    Name = "custom route table"
+x
+    Name = "ac1-rt"
+
+Se define ambas route table para cada subnet correspondiente
+
+resource "aws_route_table_association" "ac1_rt_assoc_1" {
+  subnet_id      = aws_subnet.ac1_public_subnet.id
+  route_table_id = aws_route_table.ac1_rt.id
+}
+
+resource "aws_route_table_association" "ac1_rt_assoc_2" {
+  subnet_id      = aws_subnet.ac1_public_subnet_2.id
+  route_table_id = aws_route_table.ac1_rt.id
+
+
+
+### security-groups.tf
+
+
+
+
+Se modifica nombre correctamente
+  resource "aws_security_group" "ac1-sg" {
+x
+  resource "aws_security_group" "ac1_sg" {
+
+  vpc_id = aws_vpc.vpc-ac1.id
+x
+  vpc_id = aws_vpc.vpc_ac1.id
+
+Se ingresa protocol = -1 para que incluya todos los protocolos
+    protocol    = "0"
+x
+    protocol    = "-1"
+
+Se modifica nombre correctamente
+  resource "aws_security_group" "ac1-lb-sg" {
+x
+  resource "aws_security_group" "ac1_lb_sg" {
+
+  vpc_id = aws_vpc.vpc-ac1.id
+x
+  vpc_id = aws_vpc.vpc_ac1.id
+
+Se coloca puerto correcto (80) y se quita comentario # para protocol
+    from_port   = 88
+    to_port     = 88
+    # protocol    = "tcp"
+x
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+
+### terraform.tfvars
+
+Se da valor a cada variable hacer la operativa mas eficientemente y no ingresar cada valor uno a uno
+
+perfil         = ""
+region         = ""
+vpc_cidr       = ""
+private_subnet = ""
+vpc_aws_az     = ""
+private_subnet-2 = ""
+vpc_aws_az-2     = ""
+
+
+x
+perfil         = "default"
+region         = "us-east-1"
+vpc_cidr       = "10.0.0.0/16"
+private_subnet = "10.0.1.0/24"
+vpc_aws_az     = "us-east-1a"
+private_subnet-2 = "10.0.2.0/24" # Subred pública 2
+vpc_aws_az-2     = "us-east-1b"
+ami = "ami-07860a2d7eb515d9a"
+
+
+
+
+
+### variables.tf
+
+Se define la variable region tipo string
+
+variable "perfil" {
+  type = string
+}
+
+variable "region" {
+  type = string
+
+Se modifica nombre correctamente a cada variable y se le da valor (Se entiende que no es una buena practica y que se debe definir en terraform.tfvars
+
+  output "ec2-id" {
+    value = aws_instance.ac1-instance.id
+x
+
+  output "ec2_id" {
+    description = "ID de la instancia EC2"
+    value       = aws_instance.ac1_instance.id
+
+  output "ec2_dns" {
+    description = "DNS público de la instancia EC2"
+    value       = aws_instance.ac1_instance.public_dns
+
+
+  output "ec2-dns" {
+    value = aws_instance.ac1-instance.public_dns
+x
+  output "ec2_public_ip" {
+    description = "IP pública de la instancia EC2"
+    value       = aws_instance.ac1_instance.public_ip
+
+  output "ec2-public-ip" {
+    value = aws_instance.ac1-instance.public_ip
+x
+  output "lb_dns" {
+    description = "DNS público del Load Balancer"
+    value       = aws_lb.ac1_lb.dns_name
+}
+
+  output "lb-ip" {
+    value = aws_lb.ac1-lb.dns_name
+x
+  variable "ami" {
+    description = "AMI utilizada para lanzar la instancia EC2"
+    type        = string
+}
+
+
+
+
+
